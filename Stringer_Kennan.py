@@ -9,7 +9,7 @@ import cv2
 # !!: Run the rest of the program, including the 3D world-space coordinate from there
 
 # Obtains a bag file from a single frame taken by L515
-def get_bag_file(self):
+def get_bag_file():
     # Obtains a bag file from a single frame taken by L515
     # try:
     pipeline = rs.pipeline()
@@ -32,12 +32,23 @@ def get_bag_file(self):
     filt.process(frame)
 
     # !: Must I use pipeline.stop?
-    pipeline.stop()
+    # pipeline.stop()
+
     # Returns the single frame captured by the camera
     return filt
 
+# !: Is this the solution to my problems to enter opencv?
+    # Convert images to numpy arrays
+    depth_image = np.asanyarray(depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+
+
+
 # Finds coordinate
-def find_corner(filt):
+def find_corner(path):
+    # # Gets bag file from picture just taken
+    # path = get_bag_file(self)
+
     # Creates Pipeline
     pipeline = rs.pipeline()
     # Creates a config object
@@ -45,7 +56,7 @@ def find_corner(filt):
     # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
     # Allows us to use the bag file created by save_single_frameset
     # !: Can test with Frameset 97.bag
-    rs.config.enable_device_from_file(config,filt)
+    rs.config.enable_device_from_file(config,path)
 
     # Configure the pipeline to stream the depth stream
     # Change this parameters according to the recorded bag file resolution
