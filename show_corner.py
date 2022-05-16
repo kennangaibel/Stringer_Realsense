@@ -2,7 +2,8 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 from PIL import Image
-# WORKING PROGRM THAT TAKES A RECORDED BAG FILE AND DETECTS CORNERS
+from matplotlib import pyplot as plt
+# WORKING PROGRAM THAT TAKES A RECORDED BAG FILE AND DETECTS CORNERS
 
 
 # Creates Pipeline
@@ -27,25 +28,25 @@ color_image = np.asanyarray(color_frame.get_data())
 
 
 
-# Gets numpy array color_image and converts it to a jpeg that opencv can use
+# Gets numpy array color_image and converts it to a png that opencv can use
 im = Image.fromarray(color_image)
 # What to save the image as
 im.save('stringer_image.png')
 
 # read the image
+# load image
 img = cv2.imread('stringer_image.png')
-# convert image to gray scale image
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# detect corners with the goodFeaturesToTrack function.
-# corners = cv2.goodFeaturesToTrack(gray, 27, 0.01, 10)
-# corners = np.int0(corners)
 gray = np.float32(gray)
-dst = cv2.cornerHarris(gray, 2, 3, 0.04)
-
-# result is dilated for marking the corners, not important
-dst = cv2.dilate(dst, None)
-# Threshold for an optimal value, it may vary depending on the image.
-img[dst > 0.01 * dst.max()] = [0, 0, 255]
-cv2.imshow('dst', img)
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
+dst = cv2.cornerHarris(gray,5,3,0.04)
+ret, dst = cv2.threshold(dst,0.1*dst.max(),255,0)
+dst = np.uint8(dst)
+ret, labels, stats, centroids = cv2.connectedComponentsWithStats(dst)
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
+corners = cv2.cornerSubPix(gray,np.float32(centroids),(5,5),(-1,-1),criteria)
+for i in range(1, len(corners)):
+    print(corners[i])
+img[dst>0.1*dst.max()]=[0,0,255]
+cv2.imshow('image', img)
+cv2.waitKey(0)
+cv2.destroyAllWindows
