@@ -1,6 +1,7 @@
 import pyrealsense2 as rs
 import numpy as np
 import cv2
+from PIL import Image
 
 # 1. save_single_frameset
 
@@ -23,28 +24,46 @@ def get_bag_file():
     align = rs.align(align_to)
 
     profile = pipeline.start(config)
-    filt = rs.save_single_frameset()
+    # Bag file representing single frame taken by camera
+    path = rs.save_single_frameset()
 
     for x in range(100):
         pipeline.wait_for_frames()
 
     frame = pipeline.wait_for_frames()
-    filt.process(frame)
+    path.process(frame)
 
     # !: Must I use pipeline.stop?
-    # pipeline.stop()
+    pipeline.stop()
 
     # Returns the single frame captured by the camera
-    return filt
+    return path
 
-# !: Is this the solution to my problems to enter opencv?
-    # Convert images to numpy arrays
-    depth_image = np.asanyarray(depth_frame.get_data())
-    color_image = np.asanyarray(color_frame.get_data())
+def get_corner_pixel(color_image):
+    # Gets numpy array color_image and converts it to a jpeg that opencv can use
+    im = Image.fromarray(color_image)
+    # What to save the image as
+    im.save('stringer_image.png')
 
+    # read the image
+    img = cv2.imread('stringer_image.png')
+    # convert image to gray scale image
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# detect corners with the goodFeaturesToTrack function.
+    # corners = cv2.goodFeaturesToTrack(gray, 27, 0.01, 10)
+    # corners = np.int0(corners)
+    gray = np.float32(gray)
+    dst = cv2.cornerHarris(gray, 2, 3, 0.04)
 
+    # result is dilated for marking the corners, not important
+    dst = cv2.dilate(dst, None)
+    # Threshold for an optimal value, it may vary depending on the image.
+    img[dst > 0.01 * dst.max()] = [0, 0, 255]
+    cv2.imshow('dst', img)
+    if cv2.waitKey(0) & 0xff == 27:
+        cv2.destroyAllWindows()
 
-# Finds coordinate
+# Finds corner
 def find_corner(path):
     # # Gets bag file from picture just taken
     # path = get_bag_file(self)
@@ -58,10 +77,18 @@ def find_corner(path):
     # !: Can test with Frameset 97.bag
     rs.config.enable_device_from_file(config,path)
 
-    # Configure the pipeline to stream the depth stream
-    # Change this parameters according to the recorded bag file resolution
-    config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 15)
-    config.enable_stream(rs.stream.color, 1920, 1080, rs.format.rgb8, 15)
+# Converts bag file to numpy image that opencv can use
+    # Wait for a coherent pair of frames: depth and color
+    frames = pipeline.wait_for_frames()
+    depth_frame = frames.get_depth_frame()
+    color_frame = frames.get_color_frame()
+
+    # Convert images to numpy arrays
+    depth_image = np.asanyarray(depth_frame.get_data())
+    color_image = np.asanyarray(color_frame.get_data())
+    # Uses np array of colors to convert to corner image
+    get_corner_pixel(color_image)
+
 
     # Start streaming from file
     profile = pipeline.start(config)
@@ -98,5 +125,9 @@ def find_corner(path):
        # Check if depth_point is the value that I want
        print(depth_point_)
 
+# Gets bag file
 path = get_bag_file()
-find_corner(path)
+# Finds corner of image from bag file
+find_corner()
+# Gets coordinate from pixel
+get_coordinate(path)
