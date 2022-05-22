@@ -137,6 +137,5 @@ def get_corner_pixels(path):
 
 # Converts 2D pixel coordinates to 3D world coordinates
 # def deproject_pixels(corners):
-
 path = get_bag_file()
 coordinate = get_corner_pixels(path)
