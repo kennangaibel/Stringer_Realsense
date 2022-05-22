@@ -4,6 +4,8 @@ import cv2
 from PIL import Image
 # THIS COMPILES
 # 1. save_single_frameset
+MIN_DEPTH = 0.4
+MAX_DEPTH = 1.0
 
 # !!: May have to do the save_single_framset, output bag file as a single method
 # !!: Next method will do the config rs.config.enable_device_from_file(config, file_name)
@@ -49,7 +51,10 @@ def get_corner_pixels(path):
     # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
     # Allows us to use the bag file created by save_single_frameset
     rs.config.enable_device_from_file(config,'./test.bag')
-    pipeline.start(config)
+    # !: Need to convert path into a string somehow
+    # rs.config.enable_device_from_file(config,path)
+
+    profile = pipeline.start(config)
 
     # Converts bag file to numpy image that opencv can use
     # Wait for a coherent pair of frames: depth and color
@@ -76,22 +81,62 @@ def get_corner_pixels(path):
     ret, labels, stats, centroids = cv2.connectedComponentsWithStats(dst)
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
     corners = cv2.cornerSubPix(gray, np.float32(centroids), (5, 5), (-1, -1), criteria)
-    # !: Filter out corners based on DEPTH
-    # Corner will always be a certain depth, only take the corner that is of that depth
-        # If depthOf(corners[i]) = DEPTH_RANGE: print
+    # Filter out corners based on DEPTH, only want corner within certain depth range
+    # List to store coordinates of corners we actually want
+    filtered_corners = []
     for i in range(1, len(corners)):
-        print(corners[i])
+        # Gets the pixel coordinates of the corner
+        x_pixel = int(corners[i][0] / 3)
+        y_pixel = int(corners[i][1] / 3)
+        # Filters based on desired depth range
+        # if (depth_image[y_pixel][x_pixel] > MIN_DEPTH and
+        #         depth_image[y_pixel][x_pixel] < MAX_DEPTH):
+        print("Corner detected: " + corners)
+        if (depth_image[y_pixel][x_pixel] < 1):
+            filtered_corners.append(corners[i])
+            print("Filtered corner " + corners[i])
     img[dst > 0.1 * dst.max()] = [0, 0, 255]
+    # # Shows image until any key press
+    # cv2.imshow('image', img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows
+
+    # Deproject pixels from filtered_corners
+    depth_scale = profile.get_device().first_depth_sensor().get_depth_scale()
+    # depth_min = 0.1  # meter
+    # depth_max = 2.0  # meter
+    depth_min = MIN_DEPTH  # meter
+    depth_max = MAX_DEPTH  # meter
+
+    depth_intrin = profile.get_stream(rs.stream.depth).as_video_stream_profile().get_intrinsics()
+    color_intrin = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
+
+    depth_to_color_extrin = profile.get_stream(rs.stream.depth).as_video_stream_profile().get_extrinsics_to(
+        profile.get_stream(rs.stream.color))
+    color_to_depth_extrin = profile.get_stream(rs.stream.color).as_video_stream_profile().get_extrinsics_to(
+        profile.get_stream(rs.stream.depth))
+    print("filtered_corners: " + filtered_corners)
+    # List to store the real world coordinates of filtered_corners
+    coordinate = []
+    # !: CHECK THAT FILTERED_CORNERS IS SAME TYPE/FORMAT AS COLOR POINT
+    for color_point in filtered_corners:
+        depth_point_ = rs.rs2_project_color_pixel_to_depth_pixel(
+            depth_frame.get_data(), depth_scale,
+            depth_min, depth_max,
+            depth_intrin, color_intrin, depth_to_color_extrin, color_to_depth_extrin, color_point)
+        print("Depth value " + depth_point_)
+        coordinate.append(depth_point_)
+    # Shows image with corners until any key press
+    # (Delete later for program to run without interruption)
     cv2.imshow('image', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows
+
     # Returns the array of corners from our program
+    return coordinate
 
-    return corners
-
-# # Converts 2D pixel coordinates to 3D world coordinates
+# Converts 2D pixel coordinates to 3D world coordinates
 # def deproject_pixels(corners):
-#
 
 path = get_bag_file()
-get_corner_pixels(path)
+coordinate = get_corner_pixels(path)

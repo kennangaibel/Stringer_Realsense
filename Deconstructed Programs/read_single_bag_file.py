@@ -19,12 +19,37 @@ align = rs.align(align_to)
 
 profile = pipeline.start(config)
 
+
+
 filt = rs.save_single_frameset()
 
 for x in range(100):
     pipeline.wait_for_frames()
 
 frame = pipeline.wait_for_frames()
+
+# !: APPLY FILTER TO GET RID OF HOLE ANOMALIES) ----------------------------------
+# Fetch color and depth frames
+depth_frame = frame.get_depth_frame()
+color_frame = frame.get_color_frame()
+
+#filter definition
+dec_filter = rs.decimation_filter() # Decimation - reduces depth frame density
+spat_filter = rs.spatial_filter() # Spatial - edge-preserving spatial smoothing
+temp_filter = rs.temporal_filter() # Temporal - reduces temporal noise
+
+depth_to_disparity = rs.disparity_transform(True)
+disparity_to_depth = rs.disparity_transform(False)
+
+# Using Filtering
+frame = dec_filter.process(depth_frame)
+spat_filter.set_option(rs.option.filter_magnitude, 4)
+spat_filter.set_option(rs.option.holes_fill, 3)
+frame = depth_to_disparity.process(frame)
+frame = spat_filter.process(frame)
+frame = temp_filter.process(frame)
+frame = disparity_to_depth.process(frame)
+# ----------------------------------------------Filter DONE
 filt.process(frame)
 # Returns the single frame captured by the camera
 print("ROSBAG file is ", filt)
