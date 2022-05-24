@@ -19,11 +19,7 @@ def get_bag_file():
     config = rs.config()
     # lower resolution for pipeline.start(config) to work
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    # config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 15)
     config.enable_stream(rs.stream.color, 1920, 1080, rs.format.rgb8, 15)
-    # Align objects
-    align_to = rs.stream.color
-    align = rs.align(align_to)
 
     profile = pipeline.start(config)
     # Bag file representing single frame taken by camera
@@ -36,7 +32,7 @@ def get_bag_file():
     path.process(frame)
 
     # !: Must I use pipeline.stop?
-    pipeline.stop()
+    # pipeline.stop()
 
     # Returns the single frame captured by the camera
     return path
@@ -52,15 +48,29 @@ def get_corner_pixels(path):
     # Allows us to use the bag file created by save_single_frameset
     rs.config.enable_device_from_file(config,'./test.bag')
     # !: Need to convert path into a string somehow
-    # rs.config.enable_device_from_file(config,path)
+    # rs.config.enable_device_from_file(config,path,True)
 
     profile = pipeline.start(config)
-
+    # ADDED ALIGN DEPTH TO COLOR SINCE DIFFERENT RESOLUTIONS ------------------
     # Converts bag file to numpy image that opencv can use
     # Wait for a coherent pair of frames: depth and color
     frames = pipeline.wait_for_frames()
-    depth_frame = frames.get_depth_frame()
-    color_frame = frames.get_color_frame()
+    # Create an align object
+    # rs.align allows us to perform alignment of depth frames to others frames
+    # The "align_to" is the stream type to which we plan to align depth frames.
+    align_to = rs.stream.color
+    align = rs.align(align_to)
+
+
+    # Align the depth frame to color frame
+    aligned_frames = align.process(frames)
+
+    # Get aligned frames
+    depth_frame = aligned_frames.get_depth_frame()  # aligned_depth_frame is a 640x480 depth image
+    color_frame = aligned_frames.get_color_frame()
+    # DELETE IF DOESN"T WORK -------------------------------------------------------
+    # depth_frame = frames.get_depth_frame()
+    # color_frame = frames.get_color_frame()
 
     # Convert images to numpy arrays
     depth_image = np.asanyarray(depth_frame.get_data())
@@ -86,15 +96,19 @@ def get_corner_pixels(path):
     filtered_corners = []
     for i in range(1, len(corners)):
         # Gets the pixel coordinates of the corner
-        x_pixel = int(corners[i][0] / 3)
-        y_pixel = int(corners[i][1] / 3)
+        # x_pixel = int(corners[i][0] / 3)
+        # y_pixel = int(corners[i][1] / 3)
+        x_pixel = int(corners[i][0])
+        y_pixel = int(corners[i][1])
         # Filters based on desired depth range
         # if (depth_image[y_pixel][x_pixel] > MIN_DEPTH and
         #         depth_image[y_pixel][x_pixel] < MAX_DEPTH):
-        print("Corner detected: " + corners)
+        print("Corner detected:")
+        print(corners[i])
         if (depth_image[y_pixel][x_pixel] < 1):
             filtered_corners.append(corners[i])
-            print("Filtered corner " + corners[i])
+            print("filtered corners")
+            print(corners[i])
     img[dst > 0.1 * dst.max()] = [0, 0, 255]
     # # Shows image until any key press
     # cv2.imshow('image', img)
@@ -115,7 +129,8 @@ def get_corner_pixels(path):
         profile.get_stream(rs.stream.color))
     color_to_depth_extrin = profile.get_stream(rs.stream.color).as_video_stream_profile().get_extrinsics_to(
         profile.get_stream(rs.stream.depth))
-    print("filtered_corners: " + filtered_corners)
+    print("filtered_corners: ")
+    print(filtered_corners)
     # List to store the real world coordinates of filtered_corners
     coordinate = []
     # !: CHECK THAT FILTERED_CORNERS IS SAME TYPE/FORMAT AS COLOR POINT
@@ -124,7 +139,8 @@ def get_corner_pixels(path):
             depth_frame.get_data(), depth_scale,
             depth_min, depth_max,
             depth_intrin, color_intrin, depth_to_color_extrin, color_to_depth_extrin, color_point)
-        print("Depth value " + depth_point_)
+        print("depth value ")
+        print(depth_point_)
         coordinate.append(depth_point_)
     # Shows image with corners until any key press
     # (Delete later for program to run without interruption)
