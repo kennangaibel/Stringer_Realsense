@@ -9,9 +9,10 @@ config = rs.config()
 
 
 # lower resolution for pipeline.start(config) to work
-config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+# 848x480 depth for 435
+config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
 # config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 15)
-config.enable_stream(rs.stream.color, 1920, 1080, rs.format.rgb8, 15)
+config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
 
 # Align objects
 align_to = rs.stream.color
@@ -28,8 +29,11 @@ frame = pipeline.wait_for_frames()
 
 # !: APPLY FILTER TO GET RID OF HOLE ANOMALIES) ----------------------------------
 # Fetch color and depth frames
-depth_frame = frame.get_depth_frame()
-color_frame = frame.get_color_frame()
+# Align the depth frame to color frame
+aligned_frames = align.process(frame)
+# Get aligned frames
+depth_frame = aligned_frames.get_depth_frame()  # aligned_depth_frame is a 640x480 depth image
+color_frame = aligned_frames.get_color_frame()
 # Spatial: Applies edge-preserving smoothing of depth data.
 # Spatial solves the 0 depth anomaly on edges
 spat_filter = rs.spatial_filter() # Spatial - edge-preserving spatial smoothing
@@ -40,8 +44,11 @@ temp_filter = rs.temporal_filter() # Temporal - reduces temporal noise
 # Sets up custom parameters for spatial filter
 # Can play around with parameters to see what yields
 # best result
+# Number of filter iterations
 spat_filter.set_option(rs.option.filter_magnitude, 4)
-spat_filter.set_option(rs.option.holes_fill, 3)
+# The greater this option parameter is set, the larger
+# the holes are filled
+spat_filter.set_option(rs.option.holes_fill, 5)
 frame = spat_filter.process(frame)
 frame = temp_filter.process(frame)
 # ----------------------------------------------Filter DONE

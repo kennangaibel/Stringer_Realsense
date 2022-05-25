@@ -14,6 +14,10 @@ dim = (width, height)
 
 # resize image
 img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+# Gets rid of "salt and pepper" noise
+# Set to 3, 9, or 15: 9 or 15 good for this application
+img = cv2.medianBlur(img, 9)
+# img = cv2.bilateralFilter(img, 11, 61, 39)
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 gray = np.float32(gray)

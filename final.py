@@ -2,6 +2,8 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 from PIL import Image
+from datetime import datetime
+
 # THIS COMPILES
 # 1. save_single_frameset
 MIN_DEPTH = 0.4
@@ -46,8 +48,12 @@ def get_corner_pixels(path):
     config = rs.config()
     # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
     # Allows us to use the bag file created by save_single_frameset
-    rs.config.enable_device_from_file(config,'./test.bag')
+    # rs.config.enable_device_from_file(config,'./test.bag')
     # !: Need to convert path into a string somehow
+
+    # CAN JUST SKIP ALL OF THIS AND ONLY RUN get_corner_pixels
+    rs.config.enable_device_from_file(config,'RealSense Frameset 118.bag')
+
     # rs.config.enable_device_from_file(config,path,True)
 
     profile = pipeline.start(config)
@@ -72,6 +78,23 @@ def get_corner_pixels(path):
     # depth_frame = frames.get_depth_frame()
     # color_frame = frames.get_color_frame()
 
+    # !: Filter doesn't affect anything here, maybe need to do
+    # it earlier?
+    # Spatial: Applies edge-preserving smoothing of depth data.
+    # Spatial solves the 0 depth anomaly on edges
+    spat_filter = rs.spatial_filter()  # Spatial - edge-preserving spatial smoothing
+    # Temporal: Filters depth data by looking into previous frames.
+    # Uses previous frames to decide whether missing values should be filled
+    # with previous data
+    temp_filter = rs.temporal_filter()  # Temporal - reduces temporal noise
+    # Sets up custom parameters for spatial filter
+    # Can play around with parameters to see what yields
+    # best result
+    spat_filter.set_option(rs.option.filter_magnitude, 4)
+    spat_filter.set_option(rs.option.holes_fill, 3)
+    frame = spat_filter.process(frames)
+    frame = temp_filter.process(frame)
+
     # Convert images to numpy arrays
     depth_image = np.asanyarray(depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
@@ -79,10 +102,20 @@ def get_corner_pixels(path):
     # Gets numpy array color_image and converts it to a png that opencv can use
     im = Image.fromarray(color_image)
     # What to save the image as
-    im.save('stringer_image.png')
+    # Adds date to png file of picture taken
+    # date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
+    # im.save(f"Stringer{date}.png")
+    # img = cv2.imread(f"Stringer{date}.png")
 
+    # !: In final implementation, delete png after use
+    im.save('stringer_image.png')
     # Loads image and runs through opencv corner finding algorithm
     img = cv2.imread('stringer_image.png')
+    # Gets rid of "salt and pepper" noise
+    # img = cv2.medianBlur(img, 3)
+    # 11, 21, 7
+    img = cv2.bilateralFilter(img, 11, 21, 7)
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = np.float32(gray)
     dst = cv2.cornerHarris(gray, 5, 3, 0.04)
@@ -101,14 +134,21 @@ def get_corner_pixels(path):
         x_pixel = int(corners[i][0])
         y_pixel = int(corners[i][1])
         # Filters based on desired depth range
+        # !: Reason this doesn't work is because depth it is
+        # getting is 0. This should be fixed with filtering
         # if (depth_image[y_pixel][x_pixel] > MIN_DEPTH and
         #         depth_image[y_pixel][x_pixel] < MAX_DEPTH):
         print("Corner detected:")
         print(corners[i])
+        print("depth")
+        print(depth_image[y_pixel][x_pixel])
         if (depth_image[y_pixel][x_pixel] < 1):
+
             filtered_corners.append(corners[i])
             print("filtered corners")
             print(corners[i])
+            print("depth")
+            print(depth_image[y_pixel][x_pixel])
     img[dst > 0.1 * dst.max()] = [0, 0, 255]
     # # Shows image until any key press
     # cv2.imshow('image', img)
@@ -135,12 +175,17 @@ def get_corner_pixels(path):
     coordinate = []
     # !: CHECK THAT FILTERED_CORNERS IS SAME TYPE/FORMAT AS COLOR POINT
     for color_point in filtered_corners:
+        # get the 3D coordinate
+        # camera_coordinate = rs.rs2_deproject_pixel_to_point(depth_intrs, [x, y], dis)
         depth_point_ = rs.rs2_project_color_pixel_to_depth_pixel(
             depth_frame.get_data(), depth_scale,
             depth_min, depth_max,
             depth_intrin, color_intrin, depth_to_color_extrin, color_to_depth_extrin, color_point)
         print("depth value ")
-        print(depth_point_)
+        print(depth_point_[0])
+        print(depth_point_[1])
+        # print(depth_point_[2])
+
         coordinate.append(depth_point_)
     # Shows image with corners until any key press
     # (Delete later for program to run without interruption)
@@ -155,3 +200,4 @@ def get_corner_pixels(path):
 # def deproject_pixels(corners):
 path = get_bag_file()
 coordinate = get_corner_pixels(path)
+exit()
