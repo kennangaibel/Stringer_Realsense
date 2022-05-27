@@ -10,4 +10,4 @@ Once it has that image, it runs it through an opencv algorithm:
 
 The corner locations found are stored in an array of pixel values, which then are filtered out based on desired depth. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
 
-Finally, we deproject the pixels from these filtered corners into 3D real world coordinates.
+Finally, the pixels from these filtered corners are mapped into 3D real world coordinates.
