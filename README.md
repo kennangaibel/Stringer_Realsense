@@ -3,7 +3,7 @@ Uses an Intel Realsense D435 for precise object detection. Detects the corner of
 
 **Retrieving the data**
 
-The camera takes a picture, retrieving a bag file. With the D435, the optimal resolutions for aligning depth with RGB with as much accuracy as possible is setting depth resolution to 848x480 and RGB resolution to 1280x720. Since these two images are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`.
+The camera takes a picture, retrieving a bag file. With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720. Since these two images are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`.
 
 **Filtering**
 
