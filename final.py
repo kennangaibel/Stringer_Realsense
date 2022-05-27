@@ -7,7 +7,7 @@ from datetime import datetime
 # THIS COMPILES
 # 1. save_single_frameset
 MIN_DEPTH = 0.4
-MAX_DEPTH = 1.0
+MAX_DEPTH = 0.7
 
 # !!: May have to do the save_single_framset, output bag file as a single method
 # !!: Next method will do the config rs.config.enable_device_from_file(config, file_name)
@@ -20,8 +20,8 @@ def get_bag_file():
     pipeline = rs.pipeline()
     config = rs.config()
     # lower resolution for pipeline.start(config) to work
-    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 1920, 1080, rs.format.rgb8, 15)
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
 
     profile = pipeline.start(config)
     # Bag file representing single frame taken by camera
@@ -41,7 +41,7 @@ def get_bag_file():
 
 # From get_corners.py
 # Gets an array of pixels that represent corners of an image
-def get_corner_pixels(path):
+def get_corner_pixels():
     # Creates Pipeline
     pipeline = rs.pipeline()
     # Creates a config object
@@ -52,7 +52,7 @@ def get_corner_pixels(path):
     # !: Need to convert path into a string somehow
 
     # CAN JUST SKIP ALL OF THIS AND ONLY RUN get_corner_pixels
-    rs.config.enable_device_from_file(config,'RealSense Frameset 118.bag')
+    rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
 
     # rs.config.enable_device_from_file(config,path,True)
 
@@ -65,6 +65,7 @@ def get_corner_pixels(path):
     # rs.align allows us to perform alignment of depth frames to others frames
     # The "align_to" is the stream type to which we plan to align depth frames.
     align_to = rs.stream.color
+    #  Aligns Depth->Color
     align = rs.align(align_to)
 
 
@@ -131,8 +132,12 @@ def get_corner_pixels(path):
         # Gets the pixel coordinates of the corner
         # x_pixel = int(corners[i][0] / 3)
         # y_pixel = int(corners[i][1] / 3)
+
         x_pixel = int(corners[i][0])
         y_pixel = int(corners[i][1])
+        print(f"X pixel: {x_pixel}")
+        print(f"Y pixel: {y_pixel}")
+
         # Filters based on desired depth range
         # !: Reason this doesn't work is because depth it is
         # getting is 0. This should be fixed with filtering
@@ -140,25 +145,23 @@ def get_corner_pixels(path):
         #         depth_image[y_pixel][x_pixel] < MAX_DEPTH):
         print("Corner detected:")
         print(corners[i])
-        print("depth")
+        # print("depth x,y")
+        # print(depth_image[x_pixel][y_pixel])
+        print("depth y,x")
         print(depth_image[y_pixel][x_pixel])
-        if (depth_image[y_pixel][x_pixel] < 1):
-
+        # !: is depth array y then x or x then y?
+        if ((MIN_DEPTH < depth_frame.get_distance(int(corners[i][0]), int(corners[i][1])) < MAX_DEPTH)):
             filtered_corners.append(corners[i])
             print("filtered corners")
             print(corners[i])
             print("depth")
             print(depth_image[y_pixel][x_pixel])
+            print(depth_frame.get_distance(int(corners[i][0]), int(corners[i][1])))
     img[dst > 0.1 * dst.max()] = [0, 0, 255]
-    # # Shows image until any key press
-    # cv2.imshow('image', img)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows
 
     # Deproject pixels from filtered_corners
     depth_scale = profile.get_device().first_depth_sensor().get_depth_scale()
-    # depth_min = 0.1  # meter
-    # depth_max = 2.0  # meter
+
     depth_min = MIN_DEPTH  # meter
     depth_max = MAX_DEPTH  # meter
 
@@ -177,14 +180,28 @@ def get_corner_pixels(path):
     for color_point in filtered_corners:
         # get the 3D coordinate
         # camera_coordinate = rs.rs2_deproject_pixel_to_point(depth_intrs, [x, y], dis)
-        depth_point_ = rs.rs2_project_color_pixel_to_depth_pixel(
-            depth_frame.get_data(), depth_scale,
-            depth_min, depth_max,
-            depth_intrin, color_intrin, depth_to_color_extrin, color_to_depth_extrin, color_point)
+        print(color_point)
+        # depth_pixel = rs.rs2_project_color_pixel_to_depth_pixel(
+        #     depth_frame.get_data(), depth_scale,
+        #     depth_min, depth_max,
+        #     depth_intrin, color_intrin, depth_to_color_extrin, color_to_depth_extrin, color_point)
+        # print(depth_pixel)
+        # Get the  depth value
+        # depth = depth_frame.get_distance(int(depth_pixel[0]), int(depth_pixel[1]))
+        # depth = depth_frame.get_distance(color_point[0], color_point[1])
+        # # depth = depth_image[filtered_corners[1]][filtered_corners[0]]
+        # # depth_point_ = rs.rs2_deproject_pixel_to_point(depth_intrin, [depth_pixel[0], depth_pixel[1]], depth)
+        # depth_point_ = rs.rs2_deproject_pixel_to_point(depth_intrin, color_point[0], color_point[1], depth)
+
+        depth = depth_frame.get_distance(int(color_point[0]), int(color_point[1]))
+        # depth = depth_frame.get_distance(color_point[0], color_point[1])
+        depth_point_ = rs.rs2_deproject_pixel_to_point(depth_intrin, [color_point[0], color_point[1]], depth)
+
+
         print("depth value ")
         print(depth_point_[0])
         print(depth_point_[1])
-        # print(depth_point_[2])
+        print(depth_point_[2])
 
         coordinate.append(depth_point_)
     # Shows image with corners until any key press
@@ -198,6 +215,6 @@ def get_corner_pixels(path):
 
 # Converts 2D pixel coordinates to 3D world coordinates
 # def deproject_pixels(corners):
-path = get_bag_file()
-coordinate = get_corner_pixels(path)
+# path = get_bag_file()
+coordinate = get_corner_pixels()
 exit()
