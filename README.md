@@ -3,7 +3,7 @@ Uses an Intel Realsense D435 for precise object detection. Detects the corner of
 
 The camera takes a picture, retrieving RGB and Depth data and storing them into numpy arrays `depth_image` and `color_image`.
 
-**Filters**
+**Filtering**
 
 The image is then filtered through a spatial and temporal filter. This is to combat an "anomaly" in the depth data in which edges and random areas of the image were mapped to have a depth value of 0.
 
@@ -13,7 +13,7 @@ The image is then filtered through a spatial and temporal filter. This is to com
 
 The spatial filter applies edge-preserving smoothing of depth data while the temporal filter uses previous frames to decide whether missing values should be filled with previous data.
 
-
+**OpenCV Algorithm**
 
 Once it has that image, it runs it through an opencv algorithm:
 1. Uses bilateral filtering to preserve edges but remove "salt and pepper" noise from the image so that camera can detect corners of concrete objects.
