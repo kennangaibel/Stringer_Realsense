@@ -22,6 +22,8 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 2. Runs a Harris Corner (corner detecting) algorithm
 3. Function `cornerSubPix()` refines the corner location, finding the sub-pixel accurate location of corners or radial saddle points.
 
+
+
 **Mapping RGB Pixel to real-word 3D coordinate**
 
 The corner locations found are stored in an array of pixel values, which then are filtered out based on desired depth. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
