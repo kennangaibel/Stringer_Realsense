@@ -197,7 +197,7 @@ def get_corner_pixels():
         # depth = depth_frame.get_distance(color_point[0], color_point[1])
         depth_point_ = rs.rs2_deproject_pixel_to_point(depth_intrin, [color_point[0], color_point[1]], depth)
 
-
+        # da
         print("depth value ")
         print(depth_point_[0])
         print(depth_point_[1])
