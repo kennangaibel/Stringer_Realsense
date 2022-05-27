@@ -3,7 +3,7 @@ Uses an Intel Realsense D435 for precise object detection. Detects the corner of
 
 The camera takes a picture, retrieving RGB and Depth data and storing them into numpy arrays `depth_image` and `color_image`.
 
-**Filters**
+> **Filters**
 The image is then filtered through a spatial and temporal filter. This is to combat an "anomaly" in the depth data in which edges and random areas of the image were mapped to have a depth value of 0.
 ![image](https://user-images.githubusercontent.com/86447811/170658290-0cc7bb66-e418-4de8-aeb1-aaf6024bca83.png)
 (The black edges indicate a depth value of 0)
