@@ -15,7 +15,7 @@ The spatial filter applies edge-preserving smoothing of depth data while the tem
 
 **OpenCV Algorithm**
 
-Once it has that image, it runs it through an opencv algorithm:
+The RGB data in the form of a numpy array, `color_image`, is then saved as a png and inputted into an opencv algorithm:
 1. Uses bilateral filtering to preserve edges but remove "salt and pepper" noise from the image so that camera can detect corners of concrete objects.
 2. Runs a Harris Corner (corner detecting) algorithm
 3. Function `cornerSubPix()` refines the corner location, finding the sub-pixel accurate location of corners or radial saddle points.
