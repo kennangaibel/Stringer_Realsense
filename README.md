@@ -11,7 +11,9 @@ With the D435, optimal resolutions for aligning depth with RGB is setting depth 
 
 **Retrieving the data**
 
-The camera takes a picture, retrieving a bag file that has both RGB and depth frames. Since these two frames are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`. Note that the bag file does not need to be directly converted into a png for the computer vision algorithm, the RGB numpy array can easily be saved into an image file via `im = Image.fromarray(color_image)` where `color_image` is the RGB numpy array.
+The camera takes a picture, retrieving a bag file that has both RGB and depth frames. Since these two frames are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`. 
+
+Note that the bag file does not need to be directly converted into a png for the computer vision algorithm, the RGB numpy array can easily be saved into an image file via `im = Image.fromarray(color_image)` where `color_image` is the RGB numpy array.
 
 **Filtering**
 
