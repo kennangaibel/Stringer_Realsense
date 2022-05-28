@@ -11,7 +11,7 @@ The image is then filtered through a spatial and temporal filter. This is to com
 
 ![image](https://user-images.githubusercontent.com/86447811/170658290-0cc7bb66-e418-4de8-aeb1-aaf6024bca83.png)
 
-(The black edges indicate a depth value of 0)
+(The black edges and dots indicate a depth value of 0)
 
 The spatial filter applies edge-preserving smoothing of depth data while the temporal filter uses previous frames to decide whether missing values should be filled with previous data.
 
@@ -26,6 +26,6 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 
 **Mapping RGB Pixel to real-word 3D coordinate**
 
-The corner locations found are stored in an array of pixel values, which then are filtered out based on desired depth. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
+The corner locations found are stored in a list of pixel values `corners`, which then are filtered out based on desired depth into list `filtered corneers`. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
 
-Finally, the pixels from these filtered corners are mapped into 3D real world coordinates.
+Finally, the pixels from these filtered corners are mapped into 3D real world coordinates with the `rs2_deproject_pixel_to_point` function.
