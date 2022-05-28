@@ -1,9 +1,14 @@
 # Stringer_Realsense
 Uses an Intel Realsense D435 for precise object detection. Detects the corner of a stringer and maps the pixel location into real-world 3D space.
 
+**Specs/Suggestions**
+
+Make sure you are using a python version 3.6-3.9. The realsense library will not work with version 3.10.
+With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720.
+
 **Retrieving the data**
 
-The camera takes a picture, retrieving a bag file. With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720. Since these two images are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`.
+The camera takes a picture, retrieving a bag file that has both RGB and depth frames. Since these two frames are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`.
 
 **Filtering**
 
@@ -23,8 +28,7 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 3. Function `cornerSubPix()` refines the corner location, finding the sub-pixel accurate location of corners or radial saddle points.
 
 
-
-**Mapping RGB Pixel to real-word 3D coordinate**
+**Mapping RGB Pixels to real-world 3D coordinates**
 
 The corner locations found are stored in a list of pixel values `corners`, which then are filtered out based on desired depth into list `filtered corneers`. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
 
