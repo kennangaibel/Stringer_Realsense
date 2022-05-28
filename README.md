@@ -3,7 +3,7 @@ Uses an Intel Realsense D435 for precise object detection. Detects the corner of
 
 **Specs/Suggestions**
 
-Make sure you are using a python version 3.6-3.9. The realsense library will not work with version 3.10.
+Make sure you are using python version 3.6-3.9. The realsense library will not work with version 3.10.
 With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720.
 
 **Retrieving the data**
