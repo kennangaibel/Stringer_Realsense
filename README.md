@@ -35,6 +35,6 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 
 **Mapping RGB Pixels to real-world 3D coordinates**
 
-The corner locations found are stored in a list of pixel values `corners`, which then are filtered out based on desired depth into list `filtered corneers`. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
+The corner locations found are stored in a list of pixel values `corners`, which then are filtered out based on desired depth into list `filtered corners`. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
 
 Finally, the pixels from these filtered corners are mapped into 3D real world coordinates with the `rs2_deproject_pixel_to_point` function.
