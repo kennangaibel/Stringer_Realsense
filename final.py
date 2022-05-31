@@ -11,30 +11,30 @@ MAX_DEPTH = 0.7
 # !!: Run the rest of the program, including the 3D world-space coordinate from there
 
 # Obtains a bag file from a single frame taken by L515
-def get_bag_file():
-    # Obtains a bag file from a single frame taken by L515
-    # try:
-    pipeline = rs.pipeline()
-    config = rs.config()
-    # Set resolutions for color and depth frames
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
-
-    profile = pipeline.start(config)
-    # Bag file representing single frame taken by camera
-    path = rs.save_single_frameset()
-
-    for x in range(100):
-        pipeline.wait_for_frames()
-
-    frame = pipeline.wait_for_frames()
-    path.process(frame)
-
-    # !: Must I use pipeline.stop?
-    # pipeline.stop()
-
-    # Returns the single frame captured by the camera
-    return path
+# def get_bag_file():
+#     # Obtains a bag file from a single frame taken by L515
+#     # try:
+#     pipeline = rs.pipeline()
+#     config = rs.config()
+#     # Set resolutions for color and depth frames
+#     config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+#     config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
+#
+#     profile = pipeline.start(config)
+#     # Bag file representing single frame taken by camera
+#     path = rs.save_single_frameset()
+#
+#     for x in range(100):
+#         pipeline.wait_for_frames()
+#
+#     frame = pipeline.wait_for_frames()
+#     path.process(frame)
+#
+#     # !: Must I use pipeline.stop?
+#     # pipeline.stop()
+#
+#     # Returns the single frame captured by the camera
+#     return path
 
 # Gets an array of pixels that represent corners of an image
 def get_corner_pixels():
@@ -45,7 +45,10 @@ def get_corner_pixels():
     # Replays an already captured bag file rather than using a present stream
     # Comment out rs.config.enable_device_from_file if you want to take a picture
     # in the present and automate the process
-    rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
+    # rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
+
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
 
     profile = pipeline.start(config)
 

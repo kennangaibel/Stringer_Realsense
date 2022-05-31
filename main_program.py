@@ -6,33 +6,6 @@ from PIL import Image
 MIN_DEPTH = 0.4
 MAX_DEPTH = 0.7
 
-
-# Obtains a bag file from a single frame taken by L515
-def get_bag_file():
-    # Obtains a bag file from a single frame taken by L515
-    # try:
-    pipeline = rs.pipeline()
-    config = rs.config()
-    # Set resolutions for color and depth frames
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
-
-    profile = pipeline.start(config)
-    # Bag file representing single frame taken by camera
-    path = rs.save_single_frameset()
-
-    for x in range(100):
-        pipeline.wait_for_frames()
-
-    frame = pipeline.wait_for_frames()
-    path.process(frame)
-
-    # !: Must I use pipeline.stop?
-    # pipeline.stop()
-
-    # Returns the single frame captured by the camera
-    return path
-
 # Gets an array of pixels that represent corners of an image
 def get_corner_pixels():
     # Creates Pipeline
@@ -49,7 +22,6 @@ def get_corner_pixels():
     # rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
 
     profile = pipeline.start(config)
-
 
     # Wait for a coherent pair of frames: depth and color
     frames = pipeline.wait_for_frames()
@@ -89,41 +61,41 @@ def get_corner_pixels():
         # Gets the pixel coordinates of the corner
         x_pixel = int(corners[i][0])
         y_pixel = int(corners[i][1])
-        print(f"X pixel: {x_pixel}")
-        print(f"Y pixel: {y_pixel}")
+        # print(f"X pixel: {x_pixel}")
+        # print(f"Y pixel: {y_pixel}")
 
         # Filters based on desired depth range
         print("Corner detected:")
         print(corners[i])
-        if ((MIN_DEPTH < depth_frame.get_distance(int(corners[i][0]), int(corners[i][1])) < MAX_DEPTH)):
+        # Applies depth filter
+        if ((MIN_DEPTH < depth_frame.get_distance(x_pixel, y_pixel) < MAX_DEPTH)):
+            # Adds the corner that gets through depth filter to a list
             filtered_corners.append(corners[i])
-            print("filtered corners")
-            print(corners[i])
-            print("depth")
-            print(depth_frame.get_distance(int(corners[i][0]), int(corners[i][1])))
+            print(f"Filtered Corner: {corners[i]}")
+            filtered_corner_depth = depth_frame.get_distance(int(corners[i][0]), int(corners[i][1]))
+            print(f"Filtered Corner depth: {filtered_corner_depth}")
 
     # Deproject pixels from filtered_corners
     depth_intrin = profile.get_stream(rs.stream.depth).as_video_stream_profile().get_intrinsics()
 
-    print("filtered_corners: ")
+    print("filtered_corners list: ")
     print(filtered_corners)
     # List to store the real world coordinates of filtered_corners
     coordinates = []
     # Converts all pixels into (x,y,z) coordinates
     for color_pixel in filtered_corners:
         # get the 3D coordinate
-        # camera_coordinate = rs.rs2_deproject_pixel_to_point(depth_intrs, [x, y], dis)
         print(color_pixel)
-
         # Gets depth value of a pixel
         depth = depth_frame.get_distance(int(color_pixel[0]), int(color_pixel[1]))
         # Gets the 3D coordinate of that pixel
         depth_point_ = rs.rs2_deproject_pixel_to_point(depth_intrin, [color_pixel[0], color_pixel[1]], depth)
 
-        print("depth value ")
-        print(depth_point_[0])
-        print(depth_point_[1])
-        print(depth_point_[2])
+        x = depth_point_[0]
+        y = depth_point_[1]
+        z = depth_point_[2]
+
+        print(f"3D Coordinate: ({x}, {y}, {z})")
 
         coordinates.append(depth_point_)
     # Shows image with corners until any key press
