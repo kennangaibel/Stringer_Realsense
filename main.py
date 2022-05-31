@@ -143,7 +143,7 @@ def get_corner_pixels():
     return coordinate
 
 # Converts 2D pixel coordinates to 3D world coordinates
-# def deproject_pixels(corners):
 # path = get_bag_file()
+# Array of 3D real-world coordinates from corners
 coordinate = get_corner_pixels()
 exit()
