@@ -6,46 +6,25 @@ from PIL import Image
 MIN_DEPTH = 0.4
 MAX_DEPTH = 0.7
 
-# !!: May have to do the save_single_framset, output bag file as a single method
-# !!: Next method will do the config rs.config.enable_device_from_file(config, file_name)
-# !!: Run the rest of the program, including the 3D world-space coordinate from there
-
-# Obtains a bag file from a single frame taken by L515
-def get_bag_file():
-    # Obtains a bag file from a single frame taken by L515
-    # try:
-    pipeline = rs.pipeline()
-    config = rs.config()
-    # Set resolutions for color and depth frames
-    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
-
-    profile = pipeline.start(config)
-    # Bag file representing single frame taken by camera
-    path = rs.save_single_frameset()
-
-    for x in range(100):
-        pipeline.wait_for_frames()
-
-    frame = pipeline.wait_for_frames()
-    path.process(frame)
-
-    # !: Must I use pipeline.stop?
-    # pipeline.stop()
-
-    # Returns the single frame captured by the camera
-    return path
-
+# From get_corners.py
 # Gets an array of pixels that represent corners of an image
 def get_corner_pixels():
     # Creates Pipeline
     pipeline = rs.pipeline()
     # Creates a config object
     config = rs.config()
+    # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
+    # Allows us to use the bag file created by save_single_frameset
+    # rs.config.enable_device_from_file(config,'./test.bag')
+    # !: Need to convert path into a string somehow
+    # Set resolutions for color and depth frames
+    config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+    config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
+
     # Replays an already captured bag file rather than using a present stream
     # Comment out rs.config.enable_device_from_file if you want to take a picture
     # in the present and automate the process
-    rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
+    # rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
 
     profile = pipeline.start(config)
 
@@ -54,7 +33,7 @@ def get_corner_pixels():
     # Creates an align object
     # The "align_to" is the stream type to which we plan to align depth frames.
     align_to = rs.stream.color
-    # Aligns depth frame to color frame
+    #  Aligns depth frame to color frame
     align = rs.align(align_to)
     aligned_frames = align.process(frames)
 
@@ -86,8 +65,6 @@ def get_corner_pixels():
     # Loads image and runs through opencv corner finding algorithm
     img = cv2.imread('stringer_image.png')
     # Gets rid of "salt and pepper" noise
-    # img = cv2.medianBlur(img, 3)
-    # 11, 21, 7
     img = cv2.bilateralFilter(img, 11, 21, 7)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
