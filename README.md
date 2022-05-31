@@ -31,6 +31,7 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 1. Uses bilateral filtering to preserve edges but remove "salt and pepper" noise from the image so that camera can detect corners of concrete objects.
 2. Runs a Harris Corner (corner detecting) algorithm
 3. Function `cornerSubPix()` refines the corner location, finding the sub-pixel accurate location of corners or radial saddle points.
+![image](https://user-images.githubusercontent.com/86447811/171096614-a89233b2-7610-40a9-bdd4-0c40ac79e9a9.png)
 
 
 **Mapping RGB Pixels to real-world 3D coordinates**
