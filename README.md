@@ -40,3 +40,8 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 The corner locations found are stored in a list of pixel values `corners`, which then are filtered out based on desired depth into list `filtered corners`. For example, if we know the stringer (or desired object) is gonna be 1-1.2 meters away, we can filter based off that, and set `MIN_DEPTH = 1` and `MAX_DEPTH = 1.2`. This will get rid of corners detected in the background or foreground that we do not care about.
 
 Finally, the pixels from these filtered corners are mapped into 3D real-world coordinates with the `rs2_deproject_pixel_to_point` function. Only one point is needed to map into 3D real-world space.
+
+# Quirks to be aware of
+Aligning depth frames to color frames `align_to = rs.stream.color`, will cause both frames to have the resolution of the color frame. This works the same way if you align color frames to depth frames via `align_to = rs.stream.depth`.
+
+The depth of any pixel can be accessed via depth numpy array `depth_image`, however, note that if you want pixel (x,y) you will have to input `depth_image[y][x]` not `depth_image[x][y]`. Furthermore, accessing depth this way will provide depth in mm. On the other hand, depth can also be accessed through the function `depth_frame.get_distance(x, y)`, which not only uses the conventional coordinate notation as parameters, but also outputs the depth in meters. For this program, `depth_frame.get_distance(x, y) is used to minimize confusion.
