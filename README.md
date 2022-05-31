@@ -32,6 +32,7 @@ The RGB data in the form of a numpy array, `color_image`, is then saved as a png
 2. Runs a Harris Corner (corner detecting) algorithm
 3. Function `cornerSubPix()` refines the corner location, finding the sub-pixel accurate location of corners or radial saddle points.
 ![image](https://user-images.githubusercontent.com/86447811/171096614-a89233b2-7610-40a9-bdd4-0c40ac79e9a9.png)
+(Example of computer vision algorithm run on a piece of paper mimicking the stringer)
 
 
 **Mapping RGB Pixels to real-world 3D coordinates**
