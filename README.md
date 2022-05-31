@@ -48,4 +48,4 @@ The depth of any pixel can be accessed via depth numpy array `depth_image`, howe
 
 Depending on your application the blurring in the OpenCV algorithm may block out too much noise or not enough. For the paper example shown above, I recommend filtering via `img = cv2.bilateralFilter(img, 11, 21, 7)`. However, for the actual stringer, a more intense blur from `img = cv2.medianBlur(img, 9)` is a lot more effective. I highly recommend taking a picture of whatever application you are using, saving it as an image, and running it through `cvTest.py`, messing with different blurring methods until you get the desired result. It doesn't have to be that perfect because the depth filter will take care of almost all noise with a narrow enough depth range.
 
-Finally, avoid running any of the programs with Intel.Realsense.Viewer.exe on concurrently. It tends to cause confusing errors that stops any of the programs from working.
+Finally, avoid running any of the programs with Intel.Realsense.Viewer.exe on concurrently. It tends to cause confusing errors that stop any of the programs from working.
