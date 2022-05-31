@@ -9,7 +9,7 @@ With the D435, optimal resolutions for aligning depth with RGB is setting depth 
 **Deconstructed Programs** contains smaller programs that accomplish tasks that are good for testing the main program. Most notably,
 `read_single_bag_file.py` which will take a picture and output a bag file that you can save so that you can analyze the RGB and depth frames on Intel.Realsense.Viewer.exe while also testing it on the main program. `cvTest.py` is the other program that you can input image files into and run the computer vision algorithm. This is a good place to test and refine the computer vision algorithm based on your application.
 
-**Retrieving the data**
+# Retrieving the data
 
 The camera takes a picture, retrieving a bag file that has both RGB and depth frames. Since these two frames are different resolutions, an align object `align` is created to align the depth frame to the color frame. Once aligned, the RGB and Depth frames are stored into numpy arrays `depth_image` and `color_image`. 
 
