@@ -6,7 +6,7 @@ Uses an Intel Realsense D435 for precise object detection. Detects the corner of
 Make sure you are using python version 3.6-3.9. The realsense library will not work with version 3.10.
 With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720.
 
-**Deconstructed Programs** contains smaller programs that accomplish tasks that are good for testing the main program `main.py`. Most notably,
+**Deconstructed Programs** contains smaller programs that accomplish tasks that are good for testing the main program `main_program.py`. Most notably,
 `read_single_bag_file.py` which will take a picture and output a bag file that you can save so that you can analyze the RGB and depth frames on Intel.Realsense.Viewer.exe while also testing it on the main program. `cvTest.py` is the other program that you can input image files into and run the computer vision algorithm. This is a good place to test and refine the computer vision algorithm based on your application.
 
 # Retrieving the data
@@ -47,3 +47,7 @@ Aligning depth frames to color frames `align_to = rs.stream.color`, will cause b
 The depth of any pixel can be accessed via depth numpy array `depth_image`, however, note that if you want the depth of pixel (x, y) you will have to input `depth_image[y][x]` not `depth_image[x][y]` (OpenCV notation). Furthermore, accessing depth this way will provide depth in millimeters. On the other hand, depth can also be accessed through the function `depth_frame.get_distance(x, y)`, which not only uses the conventional coordinate notation as parameters, but also outputs the depth in meters. For this program, `depth_frame.get_distance(x, y) is used to minimize confusion.
 
 Depending on your application the blurring in the OpenCV algorithm may block out too much noise or not enough. For the paper example shown above, I recommend filtering via `img = cv2.bilateralFilter(img, 11, 21, 7)`. However, for the actual stringer, a more intense blur from `img = cv2.medianBlur(img, 9)` is a lot more effective. I highly recommend taking a picture of whatever application you are using, saving it as an image, and running it through `cvTest.py`, messing with different blurring methods until you get the desired result. It doesn't have to be that perfect because the depth filter will take care of almost all noise with a narrow enough depth range.
+
+If you create a main.py file, the realsense will just livestream the frames it is receiving and won't run the actual program. This is why the main program is named `main_program.py` rather than `main.py`.
+
+Finally, avoid running any of the programs with Intel.Realsense.Viewer.exe on concurrently. It tends to cause confusing errors that stop any of the programs from working.
