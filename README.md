@@ -7,7 +7,7 @@ Make sure you are using python version 3.6-3.9. The realsense library will not w
 With the D435, optimal resolutions for aligning depth with RGB is setting depth resolution to 848x480 and RGB resolution to 1280x720.
 
 **Deconstructed Programs** contains smaller programs that accomplish tasks that are good for testing the main program `main_program.py`. Most notably,
-`read_single_bag_file.py` which will take a picture and output a bag file that you can save so that you can analyze the RGB and depth frames on Intel.Realsense.Viewer.exe while also testing it on the main program. `cvTest.py` is the other program that you can input image files into and run the computer vision algorithm. This is a good place to test and refine the computer vision algorithm based on your application.
+`read_single_bag_file.py` which will take a picture and output a bag file that you can save so that you can analyze the RGB and depth frames on Intel.Realsense.Viewer.exe while also testing it on the main program. `cvTest.py` is the other program that you can input image files into and run the computer vision algorithm. This is a good place to test and refine it based on your application.
 
 # Retrieving the data
 
