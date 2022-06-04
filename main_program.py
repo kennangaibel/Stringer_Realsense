@@ -6,8 +6,9 @@ from PIL import Image
 MIN_DEPTH = 0.4
 MAX_DEPTH = 0.7
 
-# Gets an array of pixels that represent corners of an image
-def get_corner_pixels():
+# Takes a picture with a Realsense D435
+# Returns a list of 3D coordinates of corners found in the image
+def get_corner_coordinates():
     try:
         # Creates Pipeline
         pipeline = rs.pipeline()
@@ -18,9 +19,10 @@ def get_corner_pixels():
         config.enable_stream(rs.stream.color, 1280, 720, rs.format.rgb8, 15)
 
         # Replays an already captured bag file rather than using a present stream
+        # Parameter: Bag file name
         # Comment out rs.config.enable_device_from_file if you want to take a picture
         # in the present and automate the process
-        rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
+        # rs.config.enable_device_from_file(config,'RealSense Frameset 117.bag')
 
         profile = pipeline.start(config)
 
@@ -107,11 +109,13 @@ def get_corner_pixels():
         print(e)
         exit()
 
+# Uses OpenCV to locate corners in an image
+# Parameter: RGB numpy array
+# Returns a list of pixel coordinates representing corners found
 def find_corners(color_image):
     # Gets numpy array color_image and converts it to a png that opencv can use
     im = Image.fromarray(color_image)
-
-    # !: In final implementation, delete png after use
+    # Saves png file
     im.save('stringer_image.png')
     # Loads image and runs through opencv corner finding algorithm
     img = cv2.imread('stringer_image.png')
@@ -132,9 +136,8 @@ def find_corners(color_image):
     return corners
 
 # Array of 3D real-world coordinates from corners
-coordinate = get_corner_pixels()
+coordinate = get_corner_coordinates()
 # Shows image with corners until any key press
-# (Delete later for program to run without interruption)
 cv2.waitKey(0)
 cv2.destroyAllWindows
 exit()
